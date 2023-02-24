@@ -15,7 +15,7 @@ class HomeControllerSpec extends BaseSpec with Injecting with GuiceOneAppPerSuit
   "HomeController GET" should {
 
     "render the index page from a new instance of controller" in {
-      val controller = new HomeController(controllerComponents)
+      val controller = new FakeGithubTutorialController(controllerComponents)
       val home = controller.index().apply(FakeRequest(GET, "/"))
 
       status(home) mustBe OK
@@ -24,7 +24,7 @@ class HomeControllerSpec extends BaseSpec with Injecting with GuiceOneAppPerSuit
     }
 
     "render the index page from the application" in {
-      val controller = inject[HomeController]
+      val controller = inject[FakeGithubTutorialController]
       val home = controller.index().apply(FakeRequest(GET, "/"))
 
       status(home) mustBe OK
