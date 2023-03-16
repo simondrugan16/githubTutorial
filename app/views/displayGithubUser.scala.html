@@ -1,0 +1,17 @@
+@import model.User
+@import helper._
+
+@(user: User)(implicit request: RequestHeader)
+
+@main("Github User"){
+<div>
+    <h1>@user.login</h1>
+    <h1>@user.created_at</h1>
+    <h1>@user.location</h1>
+    <h1>@user.followers</h1>
+    <h1>@user.following</h1>
+</div>
+<div>
+    <a href="http://localhost:9000/githubApi/githubUser/@user.login/repositories/">User repos!</a>
+</div>
+}

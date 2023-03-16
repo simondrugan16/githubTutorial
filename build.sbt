@@ -1,6 +1,3 @@
-name := """githubTutorial"""
-organization := "com.example"
-
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalaVersion := "2.13.8"
@@ -12,6 +9,7 @@ lazy val root = (project in file("."))
   .enablePlugins(PlayScala)
 
 resolvers += "HMRC-open-artefacts-maven2" at "https://open.artefacts.tax.service.gov.uk/maven2"
+
 libraryDependencies ++= Seq(
   "uk.gov.hmrc.mongo"      %% "hmrc-mongo-play-28"   % "0.63.0",
   guice,
@@ -19,7 +17,10 @@ libraryDependencies ++= Seq(
   "org.scalamock"          %% "scalamock"               % "5.1.0"             % Test,
   "org.scalatestplus.play" %% "scalatestplus-play"   % "5.0.0"          % Test,
   ws,
-  "org.typelevel"                %% "cats-core"                 % "2.3.0"
+  "org.typelevel"                %% "cats-core"                 % "2.3.0",
+  "com.github.tomakehurst" % "wiremock-jre8" % "2.33.2" % Test,
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.11.0",
+  "com.fasterxml.jackson.module" %% "jackson-module-scala" % "2.11.0" % Test
 )
 
 

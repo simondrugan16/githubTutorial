@@ -8,14 +8,14 @@ import play.api.mvc.ControllerComponents
 import play.api.test.Helpers.{GET, contentType, defaultAwaitTimeout, route, status, writeableOf_AnyContentAsEmpty}
 import play.api.test.{FakeRequest, Helpers, Injecting}
 
-class HomeControllerSpec extends BaseSpec with Injecting with GuiceOneAppPerSuite {
+class HomeControllerSpec extends BaseSpec with GuiceOneAppPerSuite with Injecting {
 
   val controllerComponents: ControllerComponents = Helpers.stubControllerComponents()
 
   "HomeController GET" should {
 
     "render the index page from a new instance of controller" in {
-      val controller = new FakeGithubTutorialController(controllerComponents)
+      val controller = new HomeController(controllerComponents)
       val home = controller.index().apply(FakeRequest(GET, "/"))
 
       status(home) mustBe OK
@@ -24,7 +24,7 @@ class HomeControllerSpec extends BaseSpec with Injecting with GuiceOneAppPerSuit
     }
 
     "render the index page from the application" in {
-      val controller = inject[FakeGithubTutorialController]
+      val controller = inject[HomeController]
       val home = controller.index().apply(FakeRequest(GET, "/"))
 
       status(home) mustBe OK

@@ -1,0 +1,18 @@
+@import model.GithubFolderOrFile
+@import model.GithubFile
+@import helper._
+
+@(file: GithubFile, login: String, repoName: String)(implicit request: RequestHeader)
+
+@main("Repository Content"){
+<div>
+    <h1>File content</h1>
+</div>
+<div>
+    <a>@{file.content}</a>
+</div>
+<div>
+    <a>@file.name</a>
+    <a>@{file.`type`}</a>
+</div>
+}

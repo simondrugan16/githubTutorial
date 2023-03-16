@@ -1,0 +1,15 @@
+@import model.UserRepo
+@import helper._
+
+@(repos: Seq[UserRepo])(implicit request: RequestHeader)
+
+@main("User Repos"){
+<div>
+    <h1>User's Repositories</h1>
+</div>
+@repos.map { repo =>
+<div>
+    <a href="http://localhost:9000/github/users/@repo.owner.login/repos/@repo.name/">@repo.name</a>
+</div>
+}
+}

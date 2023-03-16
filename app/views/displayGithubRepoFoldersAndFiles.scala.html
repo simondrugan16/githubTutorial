@@ -1,0 +1,23 @@
+@import model.GithubFolderOrFile
+@import helper._
+
+@(foldersAndFiles: Seq[GithubFolderOrFile], login: String, repoName: String)(implicit request: RequestHeader)
+
+@main("Repository Content"){
+    <div>
+      <h1>Repository Content</h1>
+    </div>
+    @foldersAndFiles.map { folderOrFile =>
+        @if(folderOrFile.`type` == "dir") {
+            <div>
+               <a href="@controllers.routes.FakeGithubTutorialController.getGithubRepoFolder(login, repoName, folderOrFile.path)">@folderOrFile.name</a>
+               <a>@{folderOrFile.`type`}</a>
+            </div>
+        } else {
+            <div>
+                <a href="@controllers.routes.FakeGithubTutorialController.getGithubRepoFile(login, repoName, folderOrFile.path)">@folderOrFile.name</a>
+                <a>@{folderOrFile.`type`}</a>
+            </div>
+        }
+    }
+}
