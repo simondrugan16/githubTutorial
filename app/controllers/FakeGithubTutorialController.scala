@@ -44,11 +44,8 @@ class FakeGithubTutorialController @Inject()(val controllerComponents: Controlle
   def getGithubRepoFolder(login: String, repoName: String, path: String): Action[AnyContent] = Action.async { implicit request =>
     userService.getGithubRepoFolder(login = login, repoName = repoName, path = path).value.map {
       case Right(foldersAndFiles: Seq[GithubFolderOrFile]) =>
-        println("AAAAAAAAAAAAAAAAAA")
         Ok(views.html.displayGithubRepoFoldersAndFiles(foldersAndFiles, login, repoName))
-      case Left(error) =>
-        println("BBBBBBBBBBBBBBBBBBB")
-        InternalServerError
+      case Left(error) => InternalServerError
     }
   }
 

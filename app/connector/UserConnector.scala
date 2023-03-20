@@ -21,12 +21,11 @@ class UserConnector @Inject() (ws: WSClient) {
           result =>
             result.json.validate[Response] match {
               case JsSuccess(returnedResponse, _) => Right(returnedResponse)
-              case JsError(errors) => {
-                println(s"PPPPPPPPPPPPPPPPPPPP\n $errors")
-                Left(InternalServerError)}
+              case JsError(errors) => Left(InternalServerError)
             }
         }
         .recover { case _: WSResponse =>
+          println("Hit777777777777 .recover method")
           Left(InternalServerError)
         }
     }
@@ -43,13 +42,12 @@ class UserConnector @Inject() (ws: WSClient) {
               case JsSuccess(returnedGithubFile, _) =>
                 val base64DecodedFile = Base64.getMimeDecoder.decode(returnedGithubFile.content).map(_.toChar).mkString
                 Right(GithubFile(name = returnedGithubFile.name, `type` = returnedGithubFile.`type`, content = base64DecodedFile))
-              case JsError(errors) => {
-                println(s"PPPPPPPPPPPPPPPPPPPP\n $errors")
-                Left(InternalServerError)
-              }
+              case JsError(errors) => Left(InternalServerError)
+
             }
         }
         .recover { case _: WSResponse =>
+          println("666666666666666")
           Left(InternalServerError)
         }
     }
