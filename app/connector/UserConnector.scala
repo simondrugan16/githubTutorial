@@ -1,8 +1,9 @@
 package connector
 
 import cats.data.EitherT
-import model.GithubFile
-import play.api.libs.json.{Format, JsError, JsSuccess, OFormat}
+import model.{GithubFile, GithubCUD}
+import play.api.http.Status.{CONFLICT, CREATED, NOT_FOUND, OK, UNPROCESSABLE_ENTITY}
+import play.api.libs.json.{Format, JsError, JsSuccess, Json, OFormat}
 import play.api.libs.ws.{WSClient, WSResponse}
 import play.api.mvc.Result
 import play.api.mvc.Results.InternalServerError
@@ -51,5 +52,28 @@ class UserConnector @Inject() (ws: WSClient) {
           Left(InternalServerError)
         }
     }
+  }
+
+  def put[Response](url: String, myModel: Response)(implicit rds: Format[Response], ec: ExecutionContext): Future[Int] = {
+    val request = ws.url(url)
+      .addHttpHeaders(("Accept", "application/vnd.github+json"), ("Authorization", s"Bearer ${sys.env("AuthPassword")}"), ("X-GitHub-Api-Version", "2022-11-28"))
+    val response = request.put(Json.toJson(myModel))
+      response
+        .map {
+          result =>
+            result.status
+        }
+  }
+
+  def delete[Response](url: String, myModel: Response)(implicit rds: Format[Response], ec: ExecutionContext): Future[Int] = {
+    val request = ws.url(url)
+      .addHttpHeaders(("Accept", "application/vnd.github+json"), ("Authorization", s"Bearer ${sys.env("AuthPassword")}"), ("X-GitHub-Api-Version", "2022-11-28"))
+      .withBody(Json.toJson(myModel))
+    val response = request.delete()
+    response
+      .map {
+        result =>
+          result.status
+      }
   }
 }

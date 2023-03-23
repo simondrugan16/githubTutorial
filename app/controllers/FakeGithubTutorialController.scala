@@ -1,6 +1,6 @@
 package controllers
 
-import model.{GithubFile, GithubFolderOrFile, User, UserRepo}
+import model.{GithubFile, GithubFolderOrFile, GithubCUD, User, UserRepo}
 
 import javax.inject._
 import play.api._
@@ -18,6 +18,13 @@ class FakeGithubTutorialController @Inject()(val controllerComponents: Controlle
       Left(BadRequest("ID empty"))
     else
       Right(id)
+  }
+
+  def validateEmptyThree(first: String, second: String, third: String): Either[Result, String] = {
+    if (first.isEmpty || second.isEmpty || third.isEmpty)
+      Left(BadRequest("ID Empty"))
+    else
+      Right("All good")
   }
 
   def getGithubUser(login: String): Action[AnyContent] = Action.async { implicit request =>
@@ -114,6 +121,42 @@ class FakeGithubTutorialController @Inject()(val controllerComponents: Controlle
             case Left(error) => error
           }} yield
           res
+    }
+  }
+
+  def githubFilePut(login: String, repoName: String, path: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    validateEmptyThree(login, repoName, path) match {
+      case Left(error) => Future(error)
+      case Right(_) => request.body.validate[GithubCUD] match {
+        case JsError(error) => Future(InternalServerError)
+        case JsSuccess(validatedGithubPut, _) => userService.
+          githubFilePut(login = login, repoName = repoName, path = path, githubPut = validatedGithubPut)
+          .map {
+          case 200 => Ok
+          case 201 => Created
+          case 404 => NotFound
+          case 409 => Conflict
+          case 422 => UnprocessableEntity
+        }
+      }
+    }
+  }
+
+  def githubFileDelete(login: String, repoName: String, path: String): Action[JsValue] = Action.async(parse.json) { implicit request =>
+    validateEmptyThree(login, repoName, path) match {
+      case Left(error) => Future(error)
+      case Right(_) => request.body.validate[GithubCUD] match {
+        case JsError(error) => Future(InternalServerError)
+        case JsSuccess(validatedGithubDelete, _) => userService.
+          githubFileDelete(login = login, repoName = repoName, path = path, githubDelete = validatedGithubDelete)
+          .map {
+            case 200 => Ok
+            case 404 => NotFound
+            case 409 => Conflict
+            case 422 => UnprocessableEntity
+            case 503 => ServiceUnavailable
+          }
+      }
     }
   }
 }

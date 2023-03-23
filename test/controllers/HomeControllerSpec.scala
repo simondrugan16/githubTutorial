@@ -17,7 +17,6 @@ class HomeControllerSpec extends BaseSpec with GuiceOneAppPerSuite with Injectin
     "render the index page from a new instance of controller" in {
       val controller = new HomeController(controllerComponents)
       val home = controller.index().apply(FakeRequest(GET, "/"))
-
       status(home) mustBe OK
       contentType(home) mustBe Some("text/html")
 
@@ -26,7 +25,8 @@ class HomeControllerSpec extends BaseSpec with GuiceOneAppPerSuite with Injectin
     "render the index page from the application" in {
       val controller = inject[HomeController]
       val home = controller.index().apply(FakeRequest(GET, "/"))
-
+      val fdfd = sys.env("AuthPassword")
+      println(fdfd)
       status(home) mustBe OK
       contentType(home) mustBe Some("text/html")
 

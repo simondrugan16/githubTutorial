@@ -19,3 +19,6 @@ GET       /githubApi/githubUser/:username/repositories/          controllers.Fak
 GET       /github/users/:username/repos/:repoName/               controllers.FakeGithubTutorialController.getGithubRepoFoldersAndFiles(username: String, repoName: String)
 GET       /github/users/:username/repos/:repoName/folder/:path   controllers.FakeGithubTutorialController.getGithubRepoFolder(username: String, repoName: String, path: String)
 GET       /github/users/:username/repos/:repoName/file/:path     controllers.FakeGithubTutorialController.getGithubRepoFile(username: String, repoName: String, path: String)
+PUT       /github/users/:username/repos/:repoName/:path          controllers.FakeGithubTutorialController.githubFilePut(username: String, repoName: String, path: String)
+DELETE    /github/users/:username/repos/:repoName/:path          controllers.FakeGithubTutorialController.githubFileDelete(username: String, repoName: String, path: String)
+

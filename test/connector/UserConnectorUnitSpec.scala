@@ -2,18 +2,20 @@ package connector
 
 import baseSpec.BaseSpec
 import com.github.tomakehurst.wiremock._
-import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, get, ok}
+import com.github.tomakehurst.wiremock.client.WireMock.{aResponse, delete, equalToJson, get, matchingJsonPath, ok, put}
 import com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig
 import com.github.tomakehurst.wiremock.http.Fault
-import model.{GithubFile, User}
+import model.{GithubCUD, GithubFile, User}
 import model.User.formats
 import org.scalatestplus.play.guice.GuiceOneAppPerSuite
 import play.api.http.Status
+import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.test.Injecting
 
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, ExecutionContext}
+import scala.util.Success
 import scala.xml.Elem
 
 class UserConnectorUnitSpec extends BaseSpec with Injecting with GuiceOneAppPerSuite {
@@ -94,6 +96,24 @@ class UserConnectorUnitSpec extends BaseSpec with Injecting with GuiceOneAppPerS
       "html": "https://github.com/simondrugan16/githubTutorial/blob/main/.gitignore"
     }
   }"""
+
+  val createRequestBody: GithubCUD = GithubCUD(
+    message = "TEST CREATE COMMIT MESSAGE",
+    content = Some(raw"bG9ncwp0YXJnZXQKLy5ic3AKLy5pZGVhCi8uaWRlYV9tb2R1bGVzCi8uY2xh\\nc3NwYXRoCi8ucHJvamVjdAovLnNldHRpbmdzCi9SVU5OSU5HX1BJRAo=\\n"),
+    sha = None
+  )
+  
+  val updateRequestBody: GithubCUD = GithubCUD(
+    message = "TEST UPDATE COMMIT MESSAGE",
+    content = Some(raw"cGFja2FnZSBtb2RlbAoKaW1wb3J0IHBsYXkuYXBpLmxpYnMuanNvbi57SnNv\nbiwgT0Zvcm1hdH0KCmNhc2UgY2xhc3MgR2l0aHViRmlsZShuYW1lOiBTdHJp\nbmcsCiAgICAgICAgICAgICAgICAgICAgICBgdHlwZWA6IFN0cmluZywKICAg\nICAgICAgICAgICAgICAgICAgIGNvbnRlbnQ6IFN0cmluZykKCm9iamVjdCBH\naXRodWJGaWxlIHsKICBpbXBsaWNpdCB2YWwgZm9ybWF0OiBPRm9ybWF0W0dp\ndGh1YkZpbGVdID0gSnNvbi5mb3JtYXRbR2l0aHViRmlsZV0KfQ==\n"),
+    sha = Some("dce73038415f7e68f232c49cefe21ad58a9056e7")
+  )
+  
+  val deleteRequestBody: GithubCUD = GithubCUD(
+    message = "TEST DELETE COMMIT MESSAGE",
+    content = None,
+    sha = Some("c36463d9e6a1ea024a666dc9ad8bc2c395876775")
+  )
 
   val validatedGithubFile: GithubFile = GithubFile(
     name = ".gitignore",
@@ -204,6 +224,73 @@ class UserConnectorUnitSpec extends BaseSpec with Injecting with GuiceOneAppPerS
       Await.result(connector.getFileContent(path).value.map {
         case Left(value) => value.header.status shouldBe Status.INTERNAL_SERVER_ERROR
         case Right(value) => fail(s"This incorrectly passed with unexpected value $value")
+      }, 2.minute)
+
+      wireMockServer.stop()
+
+    }
+  }
+
+  "UserConnector .put" should {
+    "Correctly follow the path to execute a PUT request with wiremock to test the API returns a valid response when creating a file on GitHub" in {
+
+      val path = "http://localhost:9000/github/users/simondrugan16/repos/Scala101/Scala101%2F.gitignore"
+      val connector: UserConnector = new UserConnector(ws)
+
+      wireMockServer.start()
+
+      wireMockServer.stubFor(put("/github/users/simondrugan16/repos/Scala101/Scala101%2F.gitignore")
+        .withRequestBody(equalToJson(Json.toJson(createRequestBody).toString()))
+        .willReturn(aResponse()
+        .withStatus(201)))
+
+      Await.result(connector.put(path, createRequestBody).map {
+        case 201 => Success
+        case _ => fail(s"Test failed as a non 201 response was returned")
+      }, 2.minute)
+
+      wireMockServer.stop()
+
+    }
+
+    "Correctly follow the path to execute a PUT request with wiremock to test the API returns a valid response when updating a file on GitHub" in {
+
+      val path = "http://localhost:9000/github/users/simondrugan16/repos/Scala101/Scala101%2F.gitignore"
+      val connector: UserConnector = new UserConnector(ws)
+
+      wireMockServer.start()
+
+      wireMockServer.stubFor(put("/github/users/simondrugan16/repos/Scala101/Scala101%2F.gitignore")
+        .withRequestBody(equalToJson(Json.toJson(updateRequestBody).toString()))
+        .willReturn(aResponse()
+          .withStatus(200)))
+
+      Await.result(connector.put(path, updateRequestBody).map {
+        case 200 => Success
+        case _ => fail(s"Test failed as a non 200 response was returned")
+      }, 2.minute)
+
+      wireMockServer.stop()
+
+    }
+  }
+
+  "UserConnector .delete" should {
+    "Correctly follow the path to execute a DELETE request with wiremock to test the API returns a valid response when deleting a file on GitHub" in {
+
+      val path = "http://localhost:9000/github/users/simondrugan16/repos/Scala101/Scala101%2F.gitignore"
+      val connector: UserConnector = new UserConnector(ws)
+
+      wireMockServer.start()
+
+      wireMockServer.stubFor(delete("/github/users/simondrugan16/repos/Scala101/Scala101%2F.gitignore")
+        .withRequestBody(equalToJson(Json.toJson(deleteRequestBody).toString()))
+        .willReturn(aResponse()
+          .withStatus(200)))
+
+      Await.result(connector.delete(path, deleteRequestBody).map {
+        case 200 => Success
+        case _ => fail(s"Test failed as a non 200 response was returned")
       }, 2.minute)
 
       wireMockServer.stop()
