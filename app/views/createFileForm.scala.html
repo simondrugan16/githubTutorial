@@ -1,0 +1,22 @@
+@import model.GithubCUDForm
+@import helper._
+
+@(createFileForm: Form[GithubCUDForm])(implicit request: RequestHeader, messages: Messages)
+
+@main("Create File Form!"){
+    <div>
+        <h1>Create File Form.</h1>
+    </div>
+    <div>
+        @helper.form(action = routes.FakeGithubTutorialController.upsertFileForm()) {
+        @helper.CSRF.formField
+        @helper.inputText(createFileForm("login"))
+        @helper.inputText(createFileForm("repoName"))
+        @helper.inputText(createFileForm("path"))
+        @helper.inputText(createFileForm("message"))
+        @helper.inputText(createFileForm("content"))
+        @helper.inputText(createFileForm("sha"))
+        <input class="submitButton" type="submit" value="Submit">
+        }
+    </div>
+}

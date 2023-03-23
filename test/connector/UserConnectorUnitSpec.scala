@@ -13,6 +13,7 @@ import play.api.libs.json.Json
 import play.api.libs.ws.WSClient
 import play.api.test.Injecting
 
+import scala.Int
 import scala.concurrent.duration.DurationInt
 import scala.concurrent.{Await, ExecutionContext}
 import scala.util.Success
@@ -244,10 +245,10 @@ class UserConnectorUnitSpec extends BaseSpec with Injecting with GuiceOneAppPerS
         .willReturn(aResponse()
         .withStatus(201)))
 
-      Await.result(connector.put(path, createRequestBody).map {
-        case 201 => Success
+      Await.result(connector.put(path, createRequestBody), 2.minute).status match {
+        case status: Int => status shouldBe 201
         case _ => fail(s"Test failed as a non 201 response was returned")
-      }, 2.minute)
+      }
 
       wireMockServer.stop()
 
@@ -265,10 +266,10 @@ class UserConnectorUnitSpec extends BaseSpec with Injecting with GuiceOneAppPerS
         .willReturn(aResponse()
           .withStatus(200)))
 
-      Await.result(connector.put(path, updateRequestBody).map {
-        case 200 => Success
+      Await.result(connector.put(path, updateRequestBody), 2.minute).status match {
+        case status: Int => status shouldBe 200
         case _ => fail(s"Test failed as a non 200 response was returned")
-      }, 2.minute)
+      }
 
       wireMockServer.stop()
 
@@ -288,10 +289,10 @@ class UserConnectorUnitSpec extends BaseSpec with Injecting with GuiceOneAppPerS
         .willReturn(aResponse()
           .withStatus(200)))
 
-      Await.result(connector.delete(path, deleteRequestBody).map {
-        case 200 => Success
+      Await.result(connector.delete(path, deleteRequestBody), 2.minute).status match {
+        case status: Int => status shouldBe 200
         case _ => fail(s"Test failed as a non 200 response was returned")
-      }, 2.minute)
+      }
 
       wireMockServer.stop()
 

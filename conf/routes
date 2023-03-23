@@ -22,3 +22,5 @@ GET       /github/users/:username/repos/:repoName/file/:path     controllers.Fak
 PUT       /github/users/:username/repos/:repoName/:path          controllers.FakeGithubTutorialController.githubFilePut(username: String, repoName: String, path: String)
 DELETE    /github/users/:username/repos/:repoName/:path          controllers.FakeGithubTutorialController.githubFileDelete(username: String, repoName: String, path: String)
 
+GET       /github/createFile                                     controllers.FakeGithubTutorialController.createFile()
+GET       /github/createFileForm                                 controllers.FakeGithubTutorialController.upsertFileForm()

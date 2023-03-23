@@ -1,17 +1,19 @@
 package controllers
 
-import model.{GithubFile, GithubFolderOrFile, GithubCUD, User, UserRepo}
+import model.{GithubCUD, GithubCUDForm, GithubFile, GithubFolderOrFile, User, UserRepo}
 
 import javax.inject._
 import play.api._
 import play.api.libs.json.{JsError, JsSuccess, JsValue, Json}
 import play.api.mvc._
+import play.filters.csrf.CSRF
 import service.{RepositoryService, UserService}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 @Singleton
-class FakeGithubTutorialController @Inject()(val controllerComponents: ControllerComponents, implicit val ec: ExecutionContext, userService: UserService, val repositoryService: RepositoryService) extends BaseController {
+class FakeGithubTutorialController @Inject()(val controllerComponents: ControllerComponents, implicit val ec: ExecutionContext, userService: UserService,
+                                             val repositoryService: RepositoryService) extends BaseController with play.api.i18n.I18nSupport {
 
   def validateEmpty(id: String): Either[Result, String] = {
     if (id.isEmpty)
@@ -128,16 +130,19 @@ class FakeGithubTutorialController @Inject()(val controllerComponents: Controlle
     validateEmptyThree(login, repoName, path) match {
       case Left(error) => Future(error)
       case Right(_) => request.body.validate[GithubCUD] match {
-        case JsError(error) => Future(InternalServerError)
-        case JsSuccess(validatedGithubPut, _) => userService.
-          githubFilePut(login = login, repoName = repoName, path = path, githubPut = validatedGithubPut)
-          .map {
-          case 200 => Ok
-          case 201 => Created
-          case 404 => NotFound
-          case 409 => Conflict
-          case 422 => UnprocessableEntity
-        }
+        case JsError(_) => Future(InternalServerError)
+        case JsSuccess(validatedGithubPut, _) =>
+//          println(validatedGithubPut)
+//          println(login)
+//          println(repoName)
+//          println(path)
+          userService
+            .githubFilePut(
+              login = login,
+              repoName = repoName,
+              path = path,
+              githubPut = validatedGithubPut
+            ).map(result => Ok(result.json))
       }
     }
   }
@@ -149,14 +154,63 @@ class FakeGithubTutorialController @Inject()(val controllerComponents: Controlle
         case JsError(error) => Future(InternalServerError)
         case JsSuccess(validatedGithubDelete, _) => userService.
           githubFileDelete(login = login, repoName = repoName, path = path, githubDelete = validatedGithubDelete)
+          .map(response => (response.status, response.body))
           .map {
-            case 200 => Ok
-            case 404 => NotFound
-            case 409 => Conflict
-            case 422 => UnprocessableEntity
-            case 503 => ServiceUnavailable
+            case (status, body) if status == 200 => Ok(body)
+            case _ => InternalServerError("There has been an error")
           }
       }
     }
   }
+
+  def accessToken(implicit request: Request[_]) = {
+    CSRF.getToken
+  }
+
+  def createFile(): Action[AnyContent] = Action { implicit request =>
+    Ok(views.html.createFileForm(GithubCUDForm.createFileForm))
+  }
+
+  def upsertFileForm(): Action[AnyContent] = Action.async { implicit request =>
+    accessToken
+    GithubCUDForm.createFileForm.bindFromRequest().fold(
+      formWithErrors => {
+        Future(BadRequest(formWithErrors.toString))
+      },
+      formData => {
+        val githubCreateData = Json.toJson(GithubCUD(formData.message, formData.content, None))
+        githubCreateData.validate[GithubCUD] match {
+          case JsError(error) => Future(InternalServerError)
+          case JsSuccess(validatedGithubCreate, _) =>
+            println(formData)
+            println(GithubCUD(formData.message, formData.content, None))
+
+            userService.githubFilePut(login = formData.login, repoName = formData.repoName, path = formData.path, githubPut = validatedGithubCreate).map(response => (response.status, response.body)).map {
+
+              case (status, body) => Ok(views.html.createFileStatus(status, body))
+              case _ => InternalServerError("There's been an error.")
+            }
+        }
+      }
+    )
+  }
+
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

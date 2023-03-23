@@ -2,8 +2,9 @@ package service
 
 import cats.data.EitherT
 import connector.UserConnector
-import model.{GithubFile, GithubFolderOrFile, GithubCUD, User, UserRepo}
+import model.{GithubCUD, GithubFile, GithubFolderOrFile, User, UserRepo}
 import play.api.libs.json.Format.GenericFormat
+import play.api.libs.ws.WSResponse
 import play.api.mvc.Result
 
 import javax.inject.{Inject, Singleton}
@@ -31,11 +32,11 @@ class UserService @Inject()(userConnector: UserConnector){
     userConnector.getFileContent[GithubFile](urlOverride.getOrElse(s"https://api.github.com/repos/$login/$repoName/contents/$path"))
 
   def githubFilePut(urlOverride: Option[String] = None, login: String, repoName: String, path: String, githubPut: GithubCUD)
-                   (implicit ec: ExecutionContext): Future[Int] =
+                   (implicit ec: ExecutionContext): Future[WSResponse] =
     userConnector.put[GithubCUD](urlOverride.getOrElse(s"https://api.github.com/repos/$login/$repoName/contents/$path"), githubPut)
 
   def githubFileDelete(urlOverride: Option[String] = None, login: String, repoName: String, path: String, githubDelete: GithubCUD)
-                   (implicit ec: ExecutionContext): Future[Int] =
+                   (implicit ec: ExecutionContext): Future[WSResponse] =
     userConnector.delete[GithubCUD](urlOverride.getOrElse(s"https://api.github.com/repos/$login/$repoName/contents/$path"), githubDelete)
 
 }
