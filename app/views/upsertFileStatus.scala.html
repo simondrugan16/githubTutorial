@@ -1,0 +1,16 @@
+@import model.GithubCUDForm
+@import helper._
+
+@(statusCode: Int, body: String)
+
+@main("Upsert Form Status!"){
+    <head>
+      <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.versioned("/stylesheets/main.css")">
+    </head>
+    <div>
+      <h1>Upsert Form Status.</h1>
+    </div>
+    <div>
+      <h2>status: @statusCode body: @body</h2>
+    </div>
+}

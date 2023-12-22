@@ -1,0 +1,25 @@
+@import model.GithubCUDForm
+@import helper._
+
+@(deleteFileForm: Form[GithubCUDForm])(implicit request: RequestHeader, messages: Messages)
+
+@main("Update File Form!"){
+    <head>
+      <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.versioned("/stylesheets/main.css")">
+    </head>
+    <div>
+      <h1>Update File Form.</h1>
+    </div>
+    <div>
+      @helper.form(action = routes.FakeGithubTutorialController.deleteFileForm()) {
+      @helper.CSRF.formField
+      @helper.inputText(deleteFileForm("login"))
+      @helper.inputText(deleteFileForm("repoName"))
+      @helper.inputText(deleteFileForm("path"))
+      @helper.inputText(deleteFileForm("message"))
+      @helper.inputText(deleteFileForm("content"))
+      @helper.inputText(deleteFileForm("sha"))
+      <input class="submitButton" type="submit" value="Submit">
+      }
+    </div>
+}

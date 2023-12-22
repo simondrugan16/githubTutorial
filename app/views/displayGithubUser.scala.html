@@ -4,14 +4,26 @@
 @(user: User)(implicit request: RequestHeader)
 
 @main("Github User"){
-<div>
-    <h1>@user.login</h1>
-    <h1>@user.created_at</h1>
-    <h1>@user.location</h1>
-    <h1>@user.followers</h1>
-    <h1>@user.following</h1>
-</div>
-<div>
-    <a href="http://localhost:9000/githubApi/githubUser/@user.login/repositories/">User repos!</a>
-</div>
+    <head>
+        <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.versioned("/stylesheets/main.css")">
+    </head>
+    <div>
+        <h1>@user.login</h1>
+        <h1>@user.created_at</h1>
+        <h1>@user.location</h1>
+        <h1>@user.followers</h1>
+        <h1>@user.following</h1>
+    </div>
+    <div>
+        <a href="http://localhost:9000/githubApi/githubUser/@user.login/repositories/">User repos!</a>
+    </div>
+    <div>
+        <a href="http://localhost:9000/github/upsertFile">Upsert a new file?</a>
+    </div>
+    <div>
+        <a href="http://localhost:9000/github/updateFile">Update a new file?</a>
+    </div>
+    <div>
+        <a href="http://localhost:9000/github/deleteFile">Delete a new file?</a>
+    </div>
 }

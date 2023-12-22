@@ -132,10 +132,6 @@ class FakeGithubTutorialController @Inject()(val controllerComponents: Controlle
       case Right(_) => request.body.validate[GithubCUD] match {
         case JsError(_) => Future(InternalServerError)
         case JsSuccess(validatedGithubPut, _) =>
-//          println(validatedGithubPut)
-//          println(login)
-//          println(repoName)
-//          println(path)
           userService
             .githubFilePut(
               login = login,
@@ -167,27 +163,71 @@ class FakeGithubTutorialController @Inject()(val controllerComponents: Controlle
     CSRF.getToken
   }
 
-  def createFile(): Action[AnyContent] = Action { implicit request =>
-    Ok(views.html.createFileForm(GithubCUDForm.createFileForm))
+  def upsertFile(): Action[AnyContent] = Action { implicit request =>
+    Ok(views.html.upsertFileForm(GithubCUDForm.CUDFileForm))
   }
 
   def upsertFileForm(): Action[AnyContent] = Action.async { implicit request =>
     accessToken
-    GithubCUDForm.createFileForm.bindFromRequest().fold(
+    GithubCUDForm.CUDFileForm.bindFromRequest().fold(
       formWithErrors => {
         Future(BadRequest(formWithErrors.toString))
       },
       formData => {
-        val githubCreateData = Json.toJson(GithubCUD(formData.message, formData.content, None))
-        githubCreateData.validate[GithubCUD] match {
+        val githubUpsertData = Json.toJson(GithubCUD(formData.message, formData.content, None))
+        githubUpsertData.validate[GithubCUD] match {
           case JsError(error) => Future(InternalServerError)
-          case JsSuccess(validatedGithubCreate, _) =>
-            println(formData)
-            println(GithubCUD(formData.message, formData.content, None))
+          case JsSuccess(validatedGithubUpsert, _) =>
+            userService.githubFilePut(login = formData.login, repoName = formData.repoName, path = formData.path, githubPut = validatedGithubUpsert).map(response => (response.status, response.body)).map {
+              case (status, body) => Ok(views.html.upsertFileStatus(status, body))
+              case _ => InternalServerError("There's been an error.")
+            }
+        }
+      }
+    )
+  }
 
-            userService.githubFilePut(login = formData.login, repoName = formData.repoName, path = formData.path, githubPut = validatedGithubCreate).map(response => (response.status, response.body)).map {
+  def updateFile(): Action[AnyContent] = Action { implicit request =>
+    Ok(views.html.updateFileForm(GithubCUDForm.CUDFileForm))
+  }
 
-              case (status, body) => Ok(views.html.createFileStatus(status, body))
+  def updateFileForm(): Action[AnyContent] = Action.async { implicit request =>
+    accessToken
+    GithubCUDForm.CUDFileForm.bindFromRequest().fold(
+      formWithErrors => {
+        Future(BadRequest(formWithErrors.toString))
+      },
+      formData => {
+        val githubUpdateData = Json.toJson(GithubCUD(formData.message, formData.content, formData.sha))
+        githubUpdateData.validate[GithubCUD] match {
+          case JsError(error) => Future(InternalServerError)
+          case JsSuccess(validatedGithubUpdate, _) =>
+            userService.githubFilePut(login = formData.login, repoName = formData.repoName, path = formData.path, githubPut = validatedGithubUpdate).map(response => (response.status, response.body)).map {
+              case (status, body) => Ok(views.html.updateFileStatus(status, body))
+              case _ => InternalServerError("There's been an error.")
+            }
+        }
+      }
+    )
+  }
+
+  def deleteFile(): Action[AnyContent] = Action { implicit request =>
+    Ok(views.html.deleteFileForm(GithubCUDForm.CUDFileForm))
+  }
+
+  def deleteFileForm(): Action[AnyContent] = Action.async { implicit request =>
+    accessToken
+    GithubCUDForm.CUDFileForm.bindFromRequest().fold(
+      formWithErrors => {
+        Future(BadRequest(formWithErrors.toString))
+      },
+      formData => {
+        val githubDeleteData = Json.toJson(GithubCUD(formData.message, None, formData.sha))
+        githubDeleteData.validate[GithubCUD] match {
+          case JsError(error) => Future(InternalServerError)
+          case JsSuccess(validatedGithubDelete, _) =>
+            userService.githubFileDelete(login = formData.login, repoName = formData.repoName, path = formData.path, githubDelete = validatedGithubDelete).map(response => (response.status, response.body)).map {
+              case (status, body) => Ok(views.html.deleteFileStatus(status, body))
               case _ => InternalServerError("There's been an error.")
             }
         }

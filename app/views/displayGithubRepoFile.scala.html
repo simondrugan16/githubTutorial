@@ -5,14 +5,17 @@
 @(file: GithubFile, login: String, repoName: String)(implicit request: RequestHeader)
 
 @main("Repository Content"){
-<div>
-    <h1>File content</h1>
-</div>
-<div>
-    <a>@{file.content}</a>
-</div>
-<div>
-    <a>@file.name</a>
-    <a>@{file.`type`}</a>
-</div>
+    <head>
+        <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.versioned("/stylesheets/main.css")">
+    </head>
+    <div>
+        <h1>File content</h1>
+    </div>
+    <div>
+        <a>@{file.content}</a>
+    </div>
+    <div>
+        <a>@file.name</a>
+        <a>@{file.`type`}</a>
+    </div>
 }

@@ -15,7 +15,7 @@ case class GithubCUDForm(login: String,
 
 object GithubCUDForm {
   implicit val format: OFormat[GithubCUDForm] = Json.format[GithubCUDForm]
-  val createFileForm: Form[GithubCUDForm] = Form(
+  val CUDFileForm: Form[GithubCUDForm] = Form(
     mapping(
       "login" -> text,
       "repoName" -> text,

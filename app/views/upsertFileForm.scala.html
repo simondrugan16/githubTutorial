@@ -1,0 +1,25 @@
+@import model.GithubCUDForm
+@import helper._
+
+@(upsertFileForm: Form[GithubCUDForm])(implicit request: RequestHeader, messages: Messages)
+
+@main("Upsert File Form!"){
+    <head>
+        <link rel="stylesheet" type="text/css" media="screen" href="@routes.Assets.versioned("/stylesheets/main.css")">
+    </head>
+    <div>
+        <h1>Upsert File Form.</h1>
+    </div>
+    <div>
+        @helper.form(action = routes.FakeGithubTutorialController.upsertFileForm()) {
+        @helper.CSRF.formField
+        @helper.inputText(upsertFileForm("login"))
+        @helper.inputText(upsertFileForm("repoName"))
+        @helper.inputText(upsertFileForm("path"))
+        @helper.inputText(upsertFileForm("message"))
+        @helper.inputText(upsertFileForm("content"))
+        @helper.inputText(upsertFileForm("sha"))
+        <input class="submitButton" type="submit" value="Submit">
+        }
+    </div>
+}

@@ -4,8 +4,15 @@
 @(foldersAndFiles: Seq[GithubFolderOrFile], login: String, repoName: String)(implicit request: RequestHeader)
 
 @main("Repository Content"){
+<html>
+    <button onclick="goBack()">Back</button>
+    <script nonce="randomValue">
+		function goBack() {
+			window.history.back();
+		}
+	</script>
     <div>
-      <h1>Repository Content</h1>
+      <h1 class="title">Repository Content</h1>
     </div>
     @foldersAndFiles.map { folderOrFile =>
         @if(folderOrFile.`type` == "dir") {
@@ -20,7 +27,5 @@
             </div>
         }
     }
-    <div>
-        <a href="http://localhost:9000/github/createFile">Create a new file?</a>
-    </div>
+</html>
 }
